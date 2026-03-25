@@ -7,7 +7,7 @@ A Generative AI prototype for real estate and interior design. This tool takes a
 | Empty Room (Input) | Room Skeleton |
 | :---: | :---: |
 | <img src="docs/before.jpg" width="400"/> | <img src="docs/skeleton.jpg" width="400"/> |
-| Furnished Room (Output) | Furnished Room with LoRA |
+| **Furnished Room (Output)** | **Furnished Room with LoRA** |
 | <img src="docs/after.jpg" width="400"/> | <img src="docs/after_lora.jpg" width="400"/> |
 
 Example Prompt: *"A bright and airy Scandinavian living room interior, filled with abundant natural daylight streaming through large windows. Light oak hardwood floor covered by a soft textured wool rug. A comfortable grey fabric sofa with clean lines, paired with a warm brown leather armchair and a minimalist pale wood coffee table. Decorative elements include a chunky knit throw blanket, potted green plants (Monstera, Fiddle Leaf Fig), minimalist abstract wall art, stacked design books, and simple ceramic vases. High detailed, photorealistic, 8k resolution, architectural photography, soft natural light, volumetric daylight, cinematic lighting, hygge aesthetic"*
