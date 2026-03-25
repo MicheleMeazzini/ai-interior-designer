@@ -23,8 +23,6 @@ This project uses `uv` for lightning-fast dependency management.
 1. Clone the repository:
    git clone https://github.com/MicheleMeazzini/ai-interior-designer.git
 
-   cd ai-interior-designer
-
 3. Run the application:
    'uv run src/app.py'
 
