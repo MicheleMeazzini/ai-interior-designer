@@ -6,7 +6,7 @@ A Generative AI prototype for real estate and interior design. This tool takes a
 
 | Empty Room (Input) | Room Skeleton | Furnished Room (Output) |
 | :---: | :---: | :---: |
-| <img src="docs/before.jpg" width="400"/> | <img src="docs/after.jpg" width="400"/> | <img src="docs/skeleton.jpg" width="400"/>
+| <img src="docs/before.jpg" width="350"/> | <img src="docs/skeleton.jpg" width="350"/> | <img src="docs/after.jpg" width="350"/>
 *Example Prompt: "Modern scandinavian living room, natural light, minimalist furniture, 8k resolution"*
 
 ## ✨ Key Features
