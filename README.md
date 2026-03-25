@@ -6,8 +6,9 @@ A Generative AI prototype for real estate and interior design. This tool takes a
 
 | Empty Room (Input) | Room Skeleton | Furnished Room (Output) |
 | :---: | :---: | :---: |
-| <img src="docs/before.jpg" width="350"/> | <img src="docs/skeleton.jpg" width="350"/> | <img src="docs/after.jpg" width="350"/>
-*Example Prompt: "Modern scandinavian living room, natural light, minimalist furniture, 8k resolution"*
+| <img src="docs/before.jpg" width="230"/> | <img src="docs/skeleton.jpg" width="230"/> | <img src="docs/after.jpg" width="230"/>
+
+*Example Prompt*: "A bright and airy Scandinavian living room interior, filled with abundant natural daylight streaming through large windows. White painted walls and light oak hardwood floor covered by a soft textured wool rug. A comfortable grey fabric sofa with clean lines, paired with a warm brown leather armchair and a minimalist pale wood coffee table. Decorative elements include a chunky knit throw blanket, linen curtains, potted green plants (Monstera, Fiddle Leaf Fig), minimalist abstract wall art, stacked design books, and simple ceramic vases. Lit candles provide a cozy atmosphere. High detailed, photorealistic, 8k resolution, architectural photography, soft natural light, volumetric daylight, cinematic lighting, hygge aesthetic"
 
 ## ✨ Key Features
 * **Structural Preservation:** Uses ControlNet (MLSD) to detect and preserve the original walls, floors, and windows.
