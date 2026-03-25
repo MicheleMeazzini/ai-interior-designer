@@ -66,7 +66,7 @@ def get_models(device):
         
     return global_mlsd, global_pipe
 
-def process_image(input_img_pil, user_prompt, progress=None):
+def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_scale=0.85):
     """Main generation function called by Gradio."""
     # Convert PIL input (numpy array) to standard PIL Image
     input_image = Image.fromarray(input_img_pil).convert("RGB")
@@ -94,9 +94,9 @@ def process_image(input_img_pil, user_prompt, progress=None):
         engineered_prompt,
         image=skeleton_img,
         negative_prompt=negative_prompt,
-        num_inference_steps=30, # Increased quality
-        guidance_scale=8.0, # Prompt fidelity
-        controlnet_conditioning_scale=0.85, # Space for furniture
+        num_inference_steps=int(num_steps),        
+        guidance_scale=float(guidance),            
+        controlnet_conditioning_scale=float(ctrl_scale), 
     ).images[0]
     
     print("Rendering completato.")

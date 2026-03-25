@@ -53,7 +53,11 @@ with gr.Blocks(title=title) as demo:
                 interactive=False
             )
 
-            # 2. Styling (Prompt)
+            with gr.Accordion("⚙️ Impostazioni Avanzate (Tuning)", open=False):
+                steps_slider = gr.Slider(minimum=10, maximum=50, value=30, step=1, label="Qualità Dettagli (Inference Steps)")
+                guidance_slider = gr.Slider(minimum=4.0, maximum=12.0, value=8.0, step=0.1, label="Fedeltà al Testo (Guidance Scale)")
+                control_slider = gr.Slider(minimum=0.0, maximum=1.0, value=0.85, step=0.05, label="Rigidità Geometrica (ControlNet Scale)")
+
             input_prompt = gr.Textbox(
                 label="Stile d'Arredamento desiderato", 
                 placeholder="es. modern Scandinavian style with light oak wood",
@@ -72,7 +76,7 @@ with gr.Blocks(title=title) as demo:
 
     generate_btn.click(
         fn=process_image, # Which function to call
-        inputs=[input_file, input_prompt], # Which inputs to take
+        inputs=[input_file, input_prompt, steps_slider, guidance_slider, control_slider], # Which inputs to take
         outputs=[output_image], # Which output to update
         # Optionally, you can add gr.Progress() to show progress on the button
     )
