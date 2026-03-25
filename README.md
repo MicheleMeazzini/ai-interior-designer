@@ -21,13 +21,14 @@ A Generative AI prototype for real estate and interior design. This tool takes a
 This project uses `uv` for lightning-fast dependency management.
 
 1. Clone the repository:
-   git clone https://github.com/MicheleMeazzini/ai-interior-designer.git
-   cd ai-interior-designer
+   'git clone https://github.com/MicheleMeazzini/ai-interior-designer.git'
 
-2. Run the application:
-   uv run src/app.py
+   'cd ai-interior-designer'
 
-3. Open the provided local URL (e.g., http://127.0.0.1:7860) in your web browser.
+3. Run the application:
+   'uv run src/app.py'
+
+4. Open the provided local URL (e.g., http://127.0.0.1:7860) in your web browser.
 
 ## 🛠️ Tech Stack
 * **UI:** Gradio
