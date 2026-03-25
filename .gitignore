@@ -1,4 +1,3 @@
-# Python-generated files
 __pycache__/
 *.py[oc]
 build/
@@ -8,5 +7,4 @@ wheels/
 
 data/
 
-# Virtual environments
 .venv
