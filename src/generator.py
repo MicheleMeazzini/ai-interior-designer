@@ -5,7 +5,7 @@ from pathlib import Path
 import warnings
 import logging
 
-# --- PULIZIA TERMINALE ---
+# --- TERMINAL CLEANUP ---
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 warnings.filterwarnings("ignore", category=UserWarning)
 logging.getLogger("diffusers").setLevel(logging.ERROR)
@@ -33,7 +33,7 @@ from controlnet_aux import MLSDdetector
 from PIL import Image
 import numpy as np
 
-# global variable to keep the pipeline in cache after the first load
+# Global variables to keep the pipeline in cache after the first load
 global_pipe = None
 global_mlsd = None
 
@@ -42,23 +42,27 @@ def get_models(device):
     global global_pipe, global_mlsd
     
     if global_mlsd is None:
-        print("Caricamento MLSD Detector...")
+        print("Loading MLSD Detector...")
         global_mlsd = MLSDdetector.from_pretrained("lllyasviel/ControlNet")
         
     if global_pipe is None:
-        print("Caricamento ControlNet Model...")
+        print("Loading ControlNet Model...")
         controlnet = ControlNetModel.from_pretrained(
             "lllyasviel/sd-controlnet-mlsd", 
             torch_dtype=torch.float16
         )
-        print("Caricamento Stable Diffusion (potrebbe richiedere tempo)...")
+        print("Loading Stable Diffusion...")
         global_pipe = StableDiffusionControlNetPipeline.from_pretrained(
             "runwayml/stable-diffusion-v1-5",
             controlnet=controlnet,
             torch_dtype=torch.float16,
             safety_checker=None
         )
-        # Optimizations for AMD
+        
+        print("Loading Interior Design LoRA...")
+        global_pipe.load_lora_weights("data/interior_design.safetensors")
+        global_pipe.fuse_lora(lora_scale=0.8) 
+
         global_pipe.scheduler = UniPCMultistepScheduler.from_config(global_pipe.scheduler.config)
         global_pipe.unet.set_attn_processor(AttnProcessor())
         global_pipe.to(device)
@@ -73,11 +77,11 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
     
     # AMD Configuration
     device = torch_directml.device()
-    print(f"Esecuzione su: {device}")
+    print(f"Running on: {device}")
     mlsd_detector, pipe = get_models(device)
 
     # Phase 1: Spatial Analysis (MLSD)
-    print("Estrazione skeleton geometrico...")
+    print("Extracting geometric skeleton...")
     # Using suggested thresholds for cleaner windows
     skeleton_img = mlsd_detector(input_image, thr_v=0.1, thr_d=0.1)
     
@@ -89,7 +93,7 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
     negative_prompt = "lowres, bad quality, blurry, distorted perspective, extra walls, mirror, painting, picture frame, wall lamp, overlapping furniture, cluttered, messy"
     
     # Phase 3: Generation
-    print("Inizio rendering AI...")
+    print("Starting AI rendering...")
     result_image = pipe(
         engineered_prompt,
         image=skeleton_img,
@@ -99,23 +103,23 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
         controlnet_conditioning_scale=float(ctrl_scale), 
     ).images[0]
     
-    print("Rendering completato.")
+    print("Rendering completed.")
     return result_image
 
 def preview_skeleton(input_img_pil):
-    """Genera e restituisce solo lo skeleton in pochi secondi."""
+    """Generates and returns only the skeleton in a few seconds."""
     if input_img_pil is None:
         return None
         
-    # Converti l'immagine
+    # Convert the image
     input_image = Image.fromarray(input_img_pil).convert("RGB")
     
-    # Prendi il device (AMD) e carica SOLO i modelli necessari
+    # Get the device (AMD) and load ONLY the necessary models
     device = torch_directml.device()
     mlsd_detector, _ = get_models(device)
     
-    print("Estrazione skeleton per anteprima rapida...")
-    # Estrae le linee
+    print("Extracting skeleton for quick preview...")
+    # Extract the lines
     skeleton_img = mlsd_detector(input_image, thr_v=0.1, thr_d=0.1)
     
     return skeleton_img
