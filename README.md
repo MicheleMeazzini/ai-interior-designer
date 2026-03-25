@@ -1,4 +1,4 @@
-# 🏡 AI Interior Architect
+# 🏡 AI Interior Designer
 
 A Generative AI prototype for real estate and interior design. This tool takes a photo of an empty room, analyzes its geometry, and instantly generates a photorealistic, fully furnished rendering based on a text prompt.
 
