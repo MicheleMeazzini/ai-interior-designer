@@ -6,7 +6,7 @@ A Generative AI prototype for real estate and interior design. This tool takes a
 
 | Empty Room (Input) | Room Skeleton | Furnished Room (Output) |
 | :---: | :---: | :---: |
-| <img src="docs/before.jpg" width="100%"/> | <img src="docs/skeleton.jpg" width="100%"/> | <img src="docs/after.jpg" width="100%"/> |
+| <img src="docs/before.jpg" width="33%"/> | <img src="docs/skeleton.jpg" width="33%"/> | <img src="docs/after.jpg" width="33%"/> |
 
 *Example Prompt*: "A bright and airy Scandinavian living room interior, filled with abundant natural daylight streaming through large windows. Light oak hardwood floor covered by a soft textured wool rug. A comfortable grey fabric sofa with clean lines, paired with a warm brown leather armchair and a minimalist pale wood coffee table. Decorative elements include a chunky knit throw blanket, potted green plants (Monstera, Fiddle Leaf Fig), minimalist abstract wall art, stacked design books, and simple ceramic vases. High detailed, photorealistic, 8k resolution, architectural photography, soft natural light, volumetric daylight, cinematic lighting, hygge aesthetic"
 
@@ -32,6 +32,6 @@ This project uses `uv` for lightning-fast dependency management.
 ## 🛠️ Tech Stack
 * **UI:** Gradio
 * **Core Generation:** Stable Diffusion v1.5
-* **Fine-Tuning:** Interior Design specific LoRA 
+* **Fine-Tuning:** LoRA 
 * **Spatial Conditioning:** ControlNet (MLSD)
 * **Environment:** Python & uv
