@@ -61,7 +61,7 @@ def get_models(device):
         
         print("Loading Interior Design LoRA...")
         global_pipe.load_lora_weights("data/interior_design.safetensors")
-        global_pipe.fuse_lora(lora_scale=0.8) 
+        global_pipe.fuse_lora(lora_scale=0.7) 
 
         global_pipe.scheduler = UniPCMultistepScheduler.from_config(global_pipe.scheduler.config)
         global_pipe.unet.set_attn_processor(AttnProcessor())
@@ -87,10 +87,10 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
     
     # Phase 2: Hyperparameter Tuning & Prompt Engineering
     # We add architectural photorealism tags by default
-    engineered_prompt = f"Large bright window revealing daylight, {user_prompt}, modern spacious minimalist architectural photography, soft sunlight, highly detailed, photorealistic, 8k, wooden floor, cinematic lighting, octane render, unreal engine 5"
+    engineered_prompt = f"{user_prompt}, highly detailed, photorealistic, 8k, wooden floor, cinematic lighting, octane render, unreal engine 5"
     
     # Improved negative prompt for architecture
-    negative_prompt = "lowres, bad quality, blurry, distorted perspective, extra walls, mirror, painting, picture frame, wall lamp, overlapping furniture, cluttered, messy"
+    negative_prompt = "lowres, bad quality, blurry, distorted perspective, extra walls, mirror, painting, picture frame, wall lamp, overlapping furniture, cluttered, messy,mutated furniture, asymmetrical architecture, floating objects, merged geometry, nonsensical shapes, Escher-like, abstract furniture, broken physics, missing table legs, deformed"
     
     # Phase 3: Generation
     print("Starting AI rendering...")
