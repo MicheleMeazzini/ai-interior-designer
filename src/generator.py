@@ -29,13 +29,14 @@ import torch
 import torch_directml
 from diffusers import StableDiffusionControlNetPipeline, ControlNetModel, UniPCMultistepScheduler
 from diffusers.models.attention_processor import AttnProcessor
-from controlnet_aux import MLSDdetector
+from controlnet_aux import MLSDdetector, MidasDetector
 from PIL import Image
 import numpy as np
 
 # Global variables to keep the pipeline in cache after the first load
 global_pipe = None
 global_mlsd = None
+global_depth_estimator = None
 
 def get_models(device):
     """Loads and caches models on the device."""
@@ -45,16 +46,21 @@ def get_models(device):
         print("Loading MLSD Detector...")
         global_mlsd = MLSDdetector.from_pretrained("lllyasviel/ControlNet")
         
+
+    if global_depth_estimator is None:
+        print("Loading Depth Estimator (MiDaS)...")
+        global_depth_estimator = MidasDetector.from_pretrained("lllyasviel/ControlNet")
+
+
     if global_pipe is None:
         print("Loading ControlNet Model...")
-        controlnet = ControlNetModel.from_pretrained(
-            "lllyasviel/sd-controlnet-mlsd", 
-            torch_dtype=torch.float16
-        )
+        controlnet_mlsd = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-mlsd", torch_dtype=torch.float16)
+        controlnet_depth = ControlNetModel.from_pretrained("lllyasviel/sd-controlnet-depth", torch_dtype=torch.float16)
+
         print("Loading Stable Diffusion...")
         global_pipe = StableDiffusionControlNetPipeline.from_pretrained(
             "runwayml/stable-diffusion-v1-5",
-            controlnet=controlnet,
+            controlnet=[controlnet_mlsd, controlnet_depth],
             torch_dtype=torch.float16,
             safety_checker=None
         )
@@ -68,7 +74,7 @@ def get_models(device):
         global_pipe.to(device)
         global_pipe.enable_attention_slicing()
         
-    return global_mlsd, global_pipe
+    return global_mlsd, global_depth_estimator, global_pipe
 
 def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_scale=0.85):
     """Main generation function called by Gradio."""
@@ -78,29 +84,26 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
     # AMD Configuration
     device = torch_directml.device()
     print(f"Running on: {device}")
-    mlsd_detector, pipe = get_models(device)
+    mlsd_detector, depth_estimator, pipe = get_models(device)
 
-    # Phase 1: Spatial Analysis (MLSD)
-    print("Extracting geometric skeleton...")
-    # Using suggested thresholds for cleaner windows
+    # Spatial Analysis
+    print("Extracting geometric skeleton and depth map...")
     skeleton_img = mlsd_detector(input_image, thr_v=0.1, thr_d=0.1)
-    
-    # Phase 2: Hyperparameter Tuning & Prompt Engineering
+    depth_map = depth_estimator(input_image)
+
     # We add architectural photorealism tags by default
     engineered_prompt = f"{user_prompt}, highly detailed, photorealistic, 8k, wooden floor, cinematic lighting, octane render, unreal engine 5"
-    
-    # Improved negative prompt for architecture
     negative_prompt = "lowres, bad quality, blurry, distorted perspective, extra walls, mirror, painting, picture frame, wall lamp, overlapping furniture, cluttered, messy,mutated furniture, asymmetrical architecture, floating objects, merged geometry, nonsensical shapes, Escher-like, abstract furniture, broken physics, missing table legs, deformed"
     
     # Phase 3: Generation
     print("Starting AI rendering...")
     result_image = pipe(
         engineered_prompt,
-        image=skeleton_img,
+        image=[skeleton_img, depth_map],
         negative_prompt=negative_prompt,
         num_inference_steps=int(num_steps),        
         guidance_scale=float(guidance),            
-        controlnet_conditioning_scale=float(ctrl_scale), 
+        controlnet_conditioning_scale=[float(ctrl_scale), 0.5], 
     ).images[0]
     
     print("Rendering completed.")
