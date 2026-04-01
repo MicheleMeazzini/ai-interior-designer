@@ -27,6 +27,7 @@ os.environ["DIR_ML_DISABLE_CONVOLUTION_CACHE"] = "1"
 
 import torch
 import torch_directml
+import gc
 from diffusers import StableDiffusionControlNetPipeline, ControlNetModel, UniPCMultistepScheduler
 from diffusers.models.attention_processor import AttnProcessor
 from controlnet_aux import MLSDdetector, MidasDetector
@@ -40,17 +41,16 @@ global_depth_estimator = None
 
 def get_models(device):
     """Loads and caches models on the device."""
-    global global_pipe, global_mlsd
-    
+
+    global global_pipe, global_mlsd, global_depth_estimator
+
     if global_mlsd is None:
         print("Loading MLSD Detector...")
         global_mlsd = MLSDdetector.from_pretrained("lllyasviel/ControlNet")
         
-
     if global_depth_estimator is None:
         print("Loading Depth Estimator (MiDaS)...")
         global_depth_estimator = MidasDetector.from_pretrained("lllyasviel/ControlNet")
-
 
     if global_pipe is None:
         print("Loading ControlNet Model...")
@@ -70,16 +70,31 @@ def get_models(device):
         global_pipe.fuse_lora(lora_scale=0.7) 
 
         global_pipe.scheduler = UniPCMultistepScheduler.from_config(global_pipe.scheduler.config)
-        global_pipe.unet.set_attn_processor(AttnProcessor())
+        
+        # Spostiamo tutto sulla scheda video AMD
         global_pipe.to(device)
-        global_pipe.enable_attention_slicing()
+        
+        print("Enabling Memory Optimizations...")
+        global_pipe.enable_attention_slicing("max")
+        global_pipe.enable_vae_slicing()
         
     return global_mlsd, global_depth_estimator, global_pipe
 
 def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_scale=0.85):
     """Main generation function called by Gradio."""
+
+    gc.collect()
+    torch_directml.device()
+
     # Convert PIL input (numpy array) to standard PIL Image
     input_image = Image.fromarray(input_img_pil).convert("RGB")
+
+    max_size = 512.0
+    ratio = max_size / max(input_image.size)
+    new_w = int((input_image.size[0] * ratio) // 8 * 8) 
+    new_h = int((input_image.size[1] * ratio) // 8 * 8)
+    
+    input_image = input_image.resize((new_w, new_h), Image.Resampling.LANCZOS)
     
     # AMD Configuration
     device = torch_directml.device()
@@ -104,6 +119,8 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
         num_inference_steps=int(num_steps),        
         guidance_scale=float(guidance),            
         controlnet_conditioning_scale=[float(ctrl_scale), 0.5], 
+        width=new_w,
+        height=new_h,
     ).images[0]
     
     print("Rendering completed.")
@@ -111,6 +128,10 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
 
 def preview_skeleton(input_img_pil):
     """Generates and returns only the skeleton in a few seconds."""
+
+    gc.collect()
+    torch_directml.device()
+
     if input_img_pil is None:
         return None
         
@@ -119,7 +140,7 @@ def preview_skeleton(input_img_pil):
     
     # Get the device (AMD) and load ONLY the necessary models
     device = torch_directml.device()
-    mlsd_detector, _ = get_models(device)
+    mlsd_detector, _, _ = get_models(device)
     
     print("Extracting skeleton for quick preview...")
     # Extract the lines
