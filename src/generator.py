@@ -39,6 +39,9 @@ global_pipe = None
 global_mlsd = None
 global_depth_estimator = None
 
+depthmap_weight = 0.25
+ctrl_scale = 0.9
+
 def get_models(device):
     """Loads and caches models on the device."""
 
@@ -80,8 +83,10 @@ def get_models(device):
         
     return global_mlsd, global_depth_estimator, global_pipe
 
-def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_scale=0.85):
+def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0):
     """Main generation function called by Gradio."""
+
+    global depthmap_weight, ctrl_scale
 
     gc.collect()
     torch_directml.device()
@@ -107,7 +112,7 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
     depth_map = depth_estimator(input_image)
 
     # We add architectural photorealism tags by default
-    engineered_prompt = f"{user_prompt}, highly detailed, photorealistic, 8k, wooden floor, cinematic lighting, octane render, unreal engine 5"
+    engineered_prompt = f"{user_prompt}, highly detailed, photorealistic, 8k, realistic lighting, octane render, unreal engine 5"
     negative_prompt = "lowres, bad quality, blurry, distorted perspective, extra walls, mirror, painting, picture frame, wall lamp, overlapping furniture, cluttered, messy,mutated furniture, asymmetrical architecture, floating objects, merged geometry, nonsensical shapes, Escher-like, abstract furniture, broken physics, missing table legs, deformed"
     
     # Phase 3: Generation
@@ -118,7 +123,8 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
         negative_prompt=negative_prompt,
         num_inference_steps=int(num_steps),        
         guidance_scale=float(guidance),            
-        controlnet_conditioning_scale=[float(ctrl_scale), 0.5], 
+        controlnet_conditioning_scale=[ctrl_scale, depthmap_weight], 
+        control_guidance_end=[1.0, 0.4],
         width=new_w,
         height=new_h,
     ).images[0]
