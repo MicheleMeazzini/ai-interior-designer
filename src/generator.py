@@ -87,11 +87,9 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
     
     # Phase 2: Hyperparameter Tuning & Prompt Engineering
     # We add architectural photorealism tags by default
-    engineered_prompt = f"Large bright window revealing daylight, {user_prompt}, modern spacious minimalist architectural photography, soft sunlight, highly detailed, photorealistic, 8k, wooden floor, cinematic lighting, octane render, unreal engine 5"
-    
+    engineered_prompt = f"{user_prompt}, photorealistic interior design, architectural photography, highly detailed, professional lighting, cinematic composition, physically based rendering, octane render, unreal engine 5, 8k resolution"    
     # Improved negative prompt for architecture
-    negative_prompt = "lowres, bad quality, blurry, distorted perspective, extra walls, mirror, painting, picture frame, wall lamp, overlapping furniture, cluttered, messy"
-    
+    negative_prompt = "lowres, worst quality, blurry, pixelated, noisy, distorted perspective, asymmetrical architecture, mutated furniture, floating objects, disconnected shadows, merged geometry, nonsensical shapes, broken physics, deformed, cluttered, messy, disorganized"    
     # Phase 3: Generation
     print("Starting AI rendering...")
     result_image = pipe(
