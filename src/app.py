@@ -5,9 +5,10 @@ import os
 import warnings
 import logging
 
-# Suppress warnings for a cleaner terminal output
+# --- CLEAN TERMINAL ---
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 os.environ["HF_HUB_DISABLE_WARNINGS"] = "1"
+# ----------------------
 
 warnings.filterwarnings("ignore")
 logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
@@ -15,14 +16,13 @@ logging.getLogger("diffusers").setLevel(logging.ERROR)
 logging.getLogger("transformers").setLevel(logging.ERROR)
 logging.getLogger("timm").setLevel(logging.ERROR)
 
-title = "AI-Interior Architect: Predictive Interior Generation"
+title = "AI Interior Designer"
 description = """
 Upload a photo of an empty room. The AI will analyze the wall geometry and create a furnished rendering 
 according to your desired style. 
-**(Technical Note: The prototype runs locally on AMD RX 6600 hardware)**.
+**(Technical Note: The models runs locally on AMD RX 6600 hardware)**.
 """
 
-# Graphic Interface 
 with gr.Blocks(title=title) as demo:
     
     gr.Markdown(f"# {title}")
@@ -62,7 +62,6 @@ with gr.Blocks(title=title) as demo:
             
             generate_btn = gr.Button("Generate Rendering", variant="primary")
             
-    # --- Event Handling ---
     preview_btn.click(
         fn=preview_skeleton,
         inputs=[input_file],
@@ -75,7 +74,6 @@ with gr.Blocks(title=title) as demo:
         outputs=[output_image], 
     )
 
-# Set share=True to generate a public link (lasts 72h)
 if __name__ == "__main__":
     print("Launching Gradio web application...")
-    demo.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    demo.launch(server_name="0.0.0.0", server_port=7860, share=False) # Set share=True to generate a public link (lasts 72h)

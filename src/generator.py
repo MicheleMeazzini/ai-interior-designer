@@ -13,7 +13,6 @@ logging.getLogger("transformers").setLevel(logging.ERROR)
 # -------------------------
 
 # --- MONKEY PATCHES ---
-# Need to patch BEFORE imports to avoid startup crashes
 if not hasattr(huggingface_hub, 'cached_download'):
     huggingface_hub.cached_download = huggingface_hub.hf_hub_download
 
@@ -21,9 +20,8 @@ import transformers.utils
 if not hasattr(transformers.utils, 'FLAX_WEIGHTS_NAME'):
     transformers.utils.FLAX_WEIGHTS_NAME = "flax_model.msgpack"
 
-# Disable incompatible DML convolutions cache
 os.environ["DIR_ML_DISABLE_CONVOLUTION_CACHE"] = "1"
-# --- END patches ---
+# ----------------------
 
 import torch
 import torch_directml
@@ -33,11 +31,11 @@ from controlnet_aux import MLSDdetector
 from PIL import Image
 import numpy as np
 
-# Global variables to keep the pipeline in cache after the first load
+# --- GLOBAL VARIABLES ---
 global_pipe = None
 global_mlsd = None
-
 controlnet_scale = 0.85
+# ----------------------
 
 def get_models(device):
     """Loads and caches models on the device."""
@@ -74,28 +72,21 @@ def get_models(device):
 
 def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0):
     """Main generation function called by Gradio."""
-    # Convert PIL input (numpy array) to standard PIL Image
 
     global controlnet_scale
 
     input_image = Image.fromarray(input_img_pil).convert("RGB")
     
-    # AMD Configuration
     device = torch_directml.device()
     print(f"Running on: {device}")
     mlsd_detector, pipe = get_models(device)
 
-    # Phase 1: Spatial Analysis (MLSD)
     print("Extracting geometric skeleton...")
-    # Using suggested thresholds for cleaner windows
     skeleton_img = mlsd_detector(input_image, thr_v=0.1, thr_d=0.1)
     
-    # Phase 2: Hyperparameter Tuning & Prompt Engineering
-    # We add architectural photorealism tags by default
     engineered_prompt = f"{user_prompt}, photorealistic interior design, architectural photography, highly detailed, professional lighting, cinematic composition, physically based rendering, octane render, unreal engine 5, 8k resolution"    
-    # Improved negative prompt for architecture
     negative_prompt = "lowres, worst quality, blurry, pixelated, noisy, distorted perspective, asymmetrical architecture, mutated furniture, floating objects, disconnected shadows, merged geometry, nonsensical shapes, broken physics, deformed, cluttered, messy, disorganized"    
-    # Phase 3: Generation
+
     print("Starting AI rendering...")
     result_image = pipe(
         engineered_prompt,
@@ -114,15 +105,12 @@ def preview_skeleton(input_img_pil):
     if input_img_pil is None:
         return None
         
-    # Convert the image
     input_image = Image.fromarray(input_img_pil).convert("RGB")
     
-    # Get the device (AMD) and load ONLY the necessary models
     device = torch_directml.device()
     mlsd_detector, _ = get_models(device)
     
     print("Extracting skeleton for quick preview...")
-    # Extract the lines
     skeleton_img = mlsd_detector(input_image, thr_v=0.1, thr_d=0.1)
     
     return skeleton_img
