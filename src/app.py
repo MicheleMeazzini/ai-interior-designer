@@ -22,18 +22,14 @@ according to your desired style.
 **(Technical Note: The prototype runs locally on AMD RX 6600 hardware)**.
 """
 
-# Defining the Graphic Interface (Layout)
+# Graphic Interface 
 with gr.Blocks(title=title) as demo:
     
-    # Main Title and Description
     gr.Markdown(f"# {title}")
     gr.Markdown(description)
     
-    # Layout Column/Row
     with gr.Row():
-        # Left Column: Inputs
         with gr.Column(scale=2):
-            # 1. Image Upload
             input_file = gr.Image(
                 label="Empty Room Photo", 
                 type="numpy",
@@ -42,13 +38,11 @@ with gr.Blocks(title=title) as demo:
 
             preview_btn = gr.Button("🔍 Extract Structural Map", variant="secondary")
             
-            # Box to display the extracted MLSD skeleton
             skeleton_output = gr.Image(
                 label="Detected MLSD Map", 
                 interactive=False
             )
             
-        # Right Column: Output
         with gr.Column(scale=3):
             output_image = gr.Image(
                 label="Rendering", 
@@ -66,10 +60,9 @@ with gr.Blocks(title=title) as demo:
                 lines=3
             )
             
-            # 2. Main Generation Button
             generate_btn = gr.Button("Generate Rendering", variant="primary")
             
-    # --- Event Handling (Connecting logic to the interface) ---
+    # --- Event Handling ---
     preview_btn.click(
         fn=preview_skeleton,
         inputs=[input_file],
@@ -77,13 +70,12 @@ with gr.Blocks(title=title) as demo:
     )
 
     generate_btn.click(
-        fn=process_image, # Which function to call
-        inputs=[input_file, input_prompt, steps_slider, guidance_slider, control_slider], # Which inputs to take
-        outputs=[output_image], # Which output to update
+        fn=process_image,
+        inputs=[input_file, input_prompt, steps_slider, guidance_slider], 
+        outputs=[output_image], 
     )
 
-# Starting the Web App
-# You can set share=True to generate a public link (lasts 72h)
+# Set share=True to generate a public link (lasts 72h)
 if __name__ == "__main__":
     print("Launching Gradio web application...")
     demo.launch(server_name="0.0.0.0", server_port=7860, share=False)

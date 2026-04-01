@@ -37,6 +37,8 @@ import numpy as np
 global_pipe = None
 global_mlsd = None
 
+controlnet_scale = 0.85
+
 def get_models(device):
     """Loads and caches models on the device."""
     global global_pipe, global_mlsd
@@ -70,9 +72,12 @@ def get_models(device):
         
     return global_mlsd, global_pipe
 
-def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_scale=0.85):
+def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0):
     """Main generation function called by Gradio."""
     # Convert PIL input (numpy array) to standard PIL Image
+
+    global controlnet_scale
+
     input_image = Image.fromarray(input_img_pil).convert("RGB")
     
     # AMD Configuration
@@ -98,7 +103,7 @@ def process_image(input_img_pil, user_prompt, num_steps=30, guidance=8.0, ctrl_s
         negative_prompt=negative_prompt,
         num_inference_steps=int(num_steps),        
         guidance_scale=float(guidance),            
-        controlnet_conditioning_scale=float(ctrl_scale), 
+        controlnet_conditioning_scale=controlnet_scale, 
     ).images[0]
     
     print("Rendering completed.")
