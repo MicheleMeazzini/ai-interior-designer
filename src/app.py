@@ -52,7 +52,6 @@ with gr.Blocks(title=title) as demo:
             with gr.Accordion("⚙️ Advanced Settings (Tuning)", open=False):
                 steps_slider = gr.Slider(minimum=10, maximum=50, value=30, step=1, label="Detail Quality (Inference Steps)")
                 guidance_slider = gr.Slider(minimum=4.0, maximum=12.0, value=8.0, step=0.1, label="Prompt Fidelity (Guidance Scale)")
-                control_slider = gr.Slider(minimum=0.0, maximum=1.0, value=0.85, step=0.05, label="Geometric Rigidity (ControlNet Scale)")
 
             input_prompt = gr.Textbox(
                 label="Desired Interior Style", 

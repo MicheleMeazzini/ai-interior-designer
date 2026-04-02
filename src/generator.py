@@ -111,6 +111,6 @@ def preview_skeleton(input_img_pil):
     mlsd_detector, _ = get_models(device)
     
     print("Extracting skeleton for quick preview...")
-    skeleton_img = mlsd_detector(input_image, thr_v=0.1, thr_d=0.1)
+    skeleton_img = mlsd_detector(input_image, thr_v=0.5, thr_d=0.5)
     
     return skeleton_img

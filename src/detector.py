@@ -12,7 +12,7 @@ def extract_room_skeleton(image_path, output_path):
     mlsd = MLSDdetector.from_pretrained("lllyasviel/ControlNet")
     
     print("Extracting architectural lines...")
-    detected_map = mlsd(input_image, thr_v=0.1, thr_d=0.1)
+    detected_map = mlsd(input_image, thr_v=1, thr_d=1)
     
     detected_map.save(output_path)
     print(f"Map successfully saved to: {output_path}")
